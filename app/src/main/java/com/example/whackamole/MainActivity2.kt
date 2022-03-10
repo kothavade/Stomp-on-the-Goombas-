@@ -80,7 +80,7 @@ class MainActivity2 : AppCompatActivity() {
             goomba.image.setOnClickListener {
                 if (goomba.state == State.VIS) {
                     score += 100
-                    x.score.text =  "Score: $score"
+                    x.score.text =  "Score: $score points"
                     val imageView = it as ImageView
                     goomba.state = State.SQUASHED
                     imageView.load(R.drawable.squashed)
@@ -123,7 +123,7 @@ class MainActivity2 : AppCompatActivity() {
             override fun onTick(millis: Long) {
                 val secondsLeft = millis.toDouble()/1000.0
                 val secondsPassed = 60 - secondsLeft.toInt()
-                x.time.text = "Time Left: ${secondsLeft.toInt()} seconds"
+                x.time.text = "0:${secondsLeft.toInt()}"
 
 
                 val percentage = secondsLeft * 1000 * factor
