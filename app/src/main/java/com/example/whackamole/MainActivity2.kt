@@ -80,7 +80,7 @@ class MainActivity2 : AppCompatActivity() {
             goomba.image.setOnClickListener {
                 if (goomba.state == State.VIS) {
                     score += 100
-                    //x.score.text =  "Score: $score"
+                    x.score.text =  "Score: $score"
                     val imageView = it as ImageView
                     goomba.state = State.SQUASHED
                     imageView.load(R.drawable.squashed)
@@ -110,7 +110,6 @@ class MainActivity2 : AppCompatActivity() {
                 while (exclude.contains(rand)) {
                     rand = Random.nextInt(0,goombas.size)
                 }
-                //TODO: More than half of goombas are excluded
                 exclude.add(rand)
                 goombas[rand].image.load(R.drawable.goombagif)
                 goombas[rand].state = State.VIS
