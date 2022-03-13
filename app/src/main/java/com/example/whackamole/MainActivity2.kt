@@ -3,6 +3,7 @@ package com.example.whackamole
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.View
@@ -150,6 +151,9 @@ class MainActivity2 : AppCompatActivity() {
                             })
                         setNegativeButton("No",
                             DialogInterface.OnClickListener { _, _ ->
+                                val sendBack = Intent(this@MainActivity2, MainActivity::class.java)
+                                sendBack.putExtra("score",score)
+                                setResult(RESULT_OK,sendBack)
                                 finish()
                             })
                         setMessage("Play Again?")
@@ -160,7 +164,7 @@ class MainActivity2 : AppCompatActivity() {
                 alertDialog?.show()
             }
         }.start()
-         fun onImageClick (view: View) {
+        fun onImageClick (view: View) {
             val imageView = view as ImageView
             GlobalScope.launch{
                 imageView.load(R.drawable.squashed)
