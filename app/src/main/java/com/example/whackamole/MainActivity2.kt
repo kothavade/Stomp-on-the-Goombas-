@@ -10,9 +10,11 @@ import android.util.Log
 import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
+import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.ScaleAnimation
 import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import coil.Coil
@@ -84,10 +86,23 @@ class MainActivity2 : AppCompatActivity() {
             goomba.image.visibility = INVISIBLE
             //it.key.startAnimation(shrinkInstant)
             goomba.image.load(R.drawable.goombagif)
+            fun addImage() {
+                val iv = ImageView(this)
+                //iv.id = View.generateViewId()
+                iv.load(R.drawable.goombagif)
+                iv.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT)
+                if (score <= 2000) {
+                    x.linearLayout1.addView(iv)
+                }
+                else if (score <= 4000) {
+                    x.linearLayout2.addView(iv)
+                }
+            }
 
             goomba.image.setOnClickListener {
                 if (goomba.state == State.VIS) {
                     score += 100
+                    addImage()
                     x.score.text =  "Score: $score points"
                     val imageView = it as ImageView
                     goomba.state = State.SQUASHED
@@ -101,6 +116,7 @@ class MainActivity2 : AppCompatActivity() {
                 }
             }
         }
+
         fun respawn(num: Int) {
             val exclude = arrayListOf<Int>()
             goombas.forEachIndexed { i, goomba ->
@@ -175,13 +191,13 @@ class MainActivity2 : AppCompatActivity() {
                 }
                 alertDialog?.show()
         }
-        fun onImageClick (view: View) {
-            val imageView = view as ImageView
-            GlobalScope.launch{
-                imageView.load(R.drawable.squashed)
-                //delay(5000)
-                imageView.visibility = INVISIBLE
-            }
-        }
+//        fun onImageClick (view: View) {
+//            val imageView = view as ImageView
+//            GlobalScope.launch{
+//                imageView.load(R.drawable.squashed)
+//                //delay(5000)
+//                imageView.visibility = INVISIBLE
+//            }
+//        }
     }
 }
