@@ -6,6 +6,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Log
 import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
@@ -13,15 +14,21 @@ import android.view.animation.Animation
 import android.view.animation.ScaleAnimation
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import coil.Coil
 import coil.ImageLoader
 import coil.decode.ImageDecoderDecoder
 import coil.load
 import com.example.whackamole.databinding.ActivityMain2Binding
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.lang.Integer.min
+import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
+import kotlin.concurrent.timer
 import kotlin.random.Random
 
 private lateinit var x: ActivityMain2Binding
@@ -119,25 +126,30 @@ class MainActivity2 : AppCompatActivity() {
             }
         }
 
-        object : CountDownTimer(61000, 1000) {
+        lifecycleScope.launch {
+            var secondsPassed = 0
             val factor = 100.0/60000
-            override fun onTick(millis: Long) {
-                val secondsLeft = millis.toDouble()/1000.0
-                val secondsPassed = 60 - secondsLeft.toInt()
-                x.time.text = "0:${secondsLeft.toInt()}"
+            while (secondsPassed < 60) {
+                val secondsLeft = 60 - secondsPassed
+                secondsPassed++
+
+                Log.d("timer", "secondsPassed: $secondsPassed")
+                Log.d("timer", "secondsLeft: $secondsLeft")
+
+                x.time.text = "0:$secondsLeft"
+
 
 
                 val percentage = secondsLeft * 1000 * factor
                 x.progressBar.progress = percentage.toInt()
-
                 if (secondsPassed % 2 == 0) {
                     val numGoombas = min(secondsPassed / 10, goombas.size/2 - 2)
                     respawn(numGoombas)
                 }
+                delay(1000)
             }
 
-            override fun onFinish() {
-                goombas.forEach {
+            goombas.forEach {
                     it.image.visibility = INVISIBLE
                 }
                 x.progressBar.progress = 0
@@ -162,8 +174,7 @@ class MainActivity2 : AppCompatActivity() {
                     builder.create()
                 }
                 alertDialog?.show()
-            }
-        }.start()
+        }
         fun onImageClick (view: View) {
             val imageView = view as ImageView
             GlobalScope.launch{
