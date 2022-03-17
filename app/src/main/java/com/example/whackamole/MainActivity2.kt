@@ -5,12 +5,10 @@ import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.os.CountDownTimer
+import android.os.PersistableBundle
 import android.util.Log
-import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
-import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.ScaleAnimation
 import android.widget.ImageView
@@ -22,15 +20,13 @@ import coil.ImageLoader
 import coil.decode.ImageDecoderDecoder
 import coil.load
 import com.example.whackamole.databinding.ActivityMain2Binding
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.lang.Integer.max
 import java.lang.Integer.min
-import java.util.*
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.collections.ArrayList
-import kotlin.concurrent.timer
 import kotlin.random.Random
 
 private lateinit var x: ActivityMain2Binding
@@ -53,6 +49,8 @@ class MainActivity2 : AppCompatActivity() {
         x.progressBar.isIndeterminate = false
         //init var
         var score = 0
+        val seconds = AtomicInteger(0)
+        val maxSeconds = AtomicInteger(60)
         var difficulty = 0
         val goombas: ArrayList<Goomba> = arrayListOf(
             Goomba(x.imageView), Goomba(x.imageView2), Goomba(x.imageView3), Goomba(x.imageView4),
@@ -89,30 +87,53 @@ class MainActivity2 : AppCompatActivity() {
             fun addImage() {
                 val iv = ImageView(this)
                 //iv.id = View.generateViewId()
-                iv.load(R.drawable.goombagif)
+                iv.load(R.drawable.coin)
+                iv.setPadding(1,0,1,0)
                 iv.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT)
-                if (score <= 2000) {
+                if (score <= 1700) {
                     x.linearLayout1.addView(iv)
                 }
-                else if (score <= 4000) {
+                else if (score <= 3400) {
                     x.linearLayout2.addView(iv)
                 }
             }
 
-            goomba.image.setOnClickListener {
+            goomba.image.setOnClickListener{
                 if (goomba.state == State.VIS) {
-                    score += 100
-                    addImage()
-                    x.score.text =  "Score: $score points"
-                    val imageView = it as ImageView
-                    goomba.state = State.SQUASHED
-                    imageView.load(R.drawable.squashed)
-                    GlobalScope.launch{
-                        delay(500)
-                        goomba.image.startAnimation(shrink)
-                        goomba.state = State.INVIS
-                        goomba.image.visibility = INVISIBLE
+                    when (goomba.type) {
+                        Type.GOOMBA -> {
+                            score += 100
+                            addImage()
+                            x.score.text = "$score points"
+                            val imageView = it as ImageView
+                            goomba.state = State.SQUASHED
+                            imageView.load(R.drawable.squashed)
+                            GlobalScope.launch {
+                                delay(500)
+                                goomba.image.startAnimation(shrink)
+                                goomba.state = State.INVIS
+                                goomba.image.visibility = INVISIBLE
+                            }
+                        }
+                        Type.BOMB -> {
+                            seconds.addAndGet(10)
+                            goomba.image.startAnimation(shrink)
+                            goomba.state = State.INVIS
+                            goomba.image.visibility = INVISIBLE
+                        }
+                        Type.MUSHROOM -> {
+                            seconds.addAndGet(-10)
+                            if (seconds.get() < 0) {
+                                maxSeconds.set(60 - seconds.get())
+                            }
+                            goomba.image.startAnimation(shrink)
+                            goomba.state = State.INVIS
+                            goomba.image.visibility = INVISIBLE
+                        }
                     }
+
+
+
                 }
             }
         }
@@ -135,69 +156,77 @@ class MainActivity2 : AppCompatActivity() {
                     rand = Random.nextInt(0,goombas.size)
                 }
                 exclude.add(rand)
-                goombas[rand].image.load(R.drawable.goombagif)
+                val r = Random.nextInt(0,10)
+                when (r) {
+                    1 -> {
+                        goombas[rand].image.load(R.drawable.bomb)
+                        goombas[rand].type = Type.BOMB
+                    }
+                    9 -> {
+                        goombas[rand].image.load(R.drawable.mushroom)
+                        goombas[rand].type = Type.MUSHROOM
+                    }
+                    else -> {
+                        goombas[rand].image.load(R.drawable.goombagif)
+                        goombas[rand].type = Type.GOOMBA
+                    }
+                }
                 goombas[rand].state = State.VIS
                 goombas[rand].image.visibility = VISIBLE
                 goombas[rand].image.startAnimation(expand)
+
             }
         }
 
         lifecycleScope.launch {
-            var secondsPassed = 0
-            val factor = 100.0/60000
-            while (secondsPassed < 60) {
-                val secondsLeft = 60 - secondsPassed
-                secondsPassed++
+            while (seconds.get() < 60) {
+                val factor = 100.0/(maxSeconds.get()*1000)
+                val secondsLeft = 60 - seconds.getAndIncrement()
 
-                Log.d("timer", "secondsPassed: $secondsPassed")
+                Log.d("timer", "secondsPassed: ${seconds.get()}")
                 Log.d("timer", "secondsLeft: $secondsLeft")
 
-                x.time.text = "0:$secondsLeft"
+                val time = String.format("%02d", secondsLeft)
+                x.time.text = "00:$time"
 
 
 
                 val percentage = secondsLeft * 1000 * factor
                 x.progressBar.progress = percentage.toInt()
-                if (secondsPassed % 2 == 0) {
-                    val numGoombas = min(secondsPassed / 10, goombas.size/2 - 2)
+                if (seconds.get() % 2 == 0) {
+                    val numGoombas = min(seconds.get() / 10, goombas.size/2 - 2)
                     respawn(numGoombas)
                 }
                 delay(1000)
             }
 
             goombas.forEach {
-                    it.image.visibility = INVISIBLE
+                it.image.visibility = INVISIBLE
+            }
+            x.progressBar.progress = 0
+            x.time.text = "00:00"
+            //play again / return to menu launcher
+            Log.d("tag", "highscore set to $score, it is $highscore")
+            if (score > highscore) {
+                highscore = score
+            }
+            val alertDialog: AlertDialog? = x.root.let {
+                val builder = AlertDialog.Builder(this@MainActivity2)
+                builder.apply {
+                    setPositiveButton("Yes",
+                        DialogInterface.OnClickListener { _, _ ->
+                            recreate()
+                        })
+                    setNegativeButton("No",
+                        DialogInterface.OnClickListener { _, _ ->
+                            finish()
+                        })
+                    setMessage("Play Again?")
+                    setTitle("Game Over. Your score was $score!")
                 }
-                x.progressBar.progress = 0
-                //play again / return to menu launcher
-                val alertDialog: AlertDialog? = x.root.let {
-                    val builder = AlertDialog.Builder(this@MainActivity2)
-                    builder.apply {
-                        setPositiveButton("Yes",
-                            DialogInterface.OnClickListener { _, _ ->
-                                recreate()
-                            })
-                        setNegativeButton("No",
-                            DialogInterface.OnClickListener { _, _ ->
-                                val sendBack = Intent(this@MainActivity2, MainActivity::class.java)
-                                sendBack.putExtra("score",score)
-                                setResult(RESULT_OK,sendBack)
-                                finish()
-                            })
-                        setMessage("Play Again?")
-                        setTitle("Game Over. Your score was $score!")
-                    }
-                    builder.create()
-                }
-                alertDialog?.show()
+                builder.create()
+            }
+            alertDialog?.show()
         }
-//        fun onImageClick (view: View) {
-//            val imageView = view as ImageView
-//            GlobalScope.launch{
-//                imageView.load(R.drawable.squashed)
-//                //delay(5000)
-//                imageView.visibility = INVISIBLE
-//            }
-//        }
     }
 }

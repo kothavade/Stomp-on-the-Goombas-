@@ -27,7 +27,7 @@
         android:fontFamily="@font/mariofont"
         android:text="Stomp on the Goombas!"
         android:textColor="#FEC3B9"
-        android:textSize="34sp"
+        android:textSize="60sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -38,20 +38,20 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/play"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="100dp"
         android:layout_marginTop="16dp"
         android:backgroundTint="#FD9835"
         android:fontFamily="@font/mariofont"
         android:text="Play!"
         android:textColor="#C94B04"
+        android:textSize="24sp"
         app:cornerRadius="0dp"
         app:layout_constraintEnd_toEndOf="@+id/name"
         app:layout_constraintStart_toStartOf="@+id/name"
         app:layout_constraintTop_toBottomOf="@+id/name"
         app:strokeColor="#c94b04"
-        app:strokeWidth="2dp"
-        />
+        app:strokeWidth="4dp" />
 
     <TextView
         android:id="@+id/highscore"
@@ -62,7 +62,7 @@
         android:fontFamily="@font/mariofont"
         android:text="TextView"
         android:textColor="#FEC3B9"
-        android:textSize="16sp"
+        android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

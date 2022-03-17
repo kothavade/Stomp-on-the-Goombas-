@@ -3,6 +3,7 @@ package com.example.whackamole
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import coil.ImageLoader
 import coil.decode.GifDecoder
 import com.example.whackamole.databinding.ActivityMainBinding
@@ -21,18 +22,15 @@ class MainActivity : AppCompatActivity() {
         z.highscore.text = "High Score: $highscore"
         z.play.setOnClickListener{
             val intent = Intent(this,MainActivity2::class.java)
-            startActivityForResult(intent,1)
+            startActivity(intent)
         }
 
 
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (data?.getIntExtra("score", 0)!! > highscore && requestCode == 1) {
-            highscore = data.getIntExtra("score", 0)
-            z.highscore.text = "High Score: $highscore"
-        }
+    override fun onResume() {
+        super.onResume()
+        Log.d("tag", "activity result: highscore is $highscore")
+        z.highscore.text = "High Score: $highscore"
     }
-
 }
