@@ -3,9 +3,8 @@ package com.example.whackamole
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.DialogInterface
-import android.content.Intent
+import android.media.MediaPlayer
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.util.Log
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
@@ -23,7 +22,6 @@ import com.example.whackamole.databinding.ActivityMain2Binding
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.lang.Integer.max
 import java.lang.Integer.min
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.collections.ArrayList
@@ -51,12 +49,14 @@ class MainActivity2 : AppCompatActivity() {
         var score = 0
         val seconds = AtomicInteger(0)
         val maxSeconds = AtomicInteger(60)
-        var difficulty = 0
         val goombas: ArrayList<Goomba> = arrayListOf(
             Goomba(x.imageView), Goomba(x.imageView2), Goomba(x.imageView3), Goomba(x.imageView4),
             Goomba(x.imageView5), Goomba(x.imageView6), Goomba(x.imageView7), Goomba(x.imageView8),
             Goomba(x.imageView9)
         )
+        val endGame = MediaPlayer.create(this, R.raw.death)
+        val coin = MediaPlayer.create(this,R.raw.coin)
+        val mushroom = MediaPlayer.create(this,R.raw.mushroom)
         //init animations
         val shrink = ScaleAnimation(
             1.0f,
@@ -96,6 +96,7 @@ class MainActivity2 : AppCompatActivity() {
                 else if (score <= 3400) {
                     x.linearLayout2.addView(iv)
                 }
+                iv.startAnimation(expand)
             }
 
             goomba.image.setOnClickListener{
@@ -104,6 +105,7 @@ class MainActivity2 : AppCompatActivity() {
                         Type.GOOMBA -> {
                             score += 100
                             addImage()
+                            coin.start()
                             x.score.text = "$score points"
                             val imageView = it as ImageView
                             goomba.state = State.SQUASHED
@@ -123,6 +125,7 @@ class MainActivity2 : AppCompatActivity() {
                         }
                         Type.MUSHROOM -> {
                             seconds.addAndGet(-10)
+                            mushroom.start()
                             if (seconds.get() < 0) {
                                 maxSeconds.set(60 - seconds.get())
                             }
@@ -179,7 +182,7 @@ class MainActivity2 : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            while (seconds.get() < 60) {
+            while (seconds.get() < 10) {
                 val factor = 100.0/(maxSeconds.get()*1000)
                 val secondsLeft = 60 - seconds.getAndIncrement()
 
@@ -199,6 +202,7 @@ class MainActivity2 : AppCompatActivity() {
                 }
                 delay(1000)
             }
+            endGame.start()
 
             goombas.forEach {
                 it.image.visibility = INVISIBLE
