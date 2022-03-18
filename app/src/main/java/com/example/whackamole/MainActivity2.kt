@@ -54,7 +54,8 @@ class MainActivity2 : AppCompatActivity() {
             Goomba(x.imageView5), Goomba(x.imageView6), Goomba(x.imageView7), Goomba(x.imageView8),
             Goomba(x.imageView9)
         )
-        val endGame = MediaPlayer.create(this, R.raw.death)
+        //smb2 sound effects: https://themushroomkingdom.net/media/smw2/wav
+        val endGame = MediaPlayer.create(this, R.raw.death_old)
         val coin = MediaPlayer.create(this,R.raw.coin)
         val mushroom = MediaPlayer.create(this,R.raw.mushroom)
         //init animations
