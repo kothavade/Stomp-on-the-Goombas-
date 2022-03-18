@@ -183,7 +183,7 @@ class MainActivity2 : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            while (seconds.get() < 10) {
+            while (seconds.get() < 60) {
                 val factor = 100.0/(maxSeconds.get()*1000)
                 val secondsLeft = 60 - seconds.getAndIncrement()
 
