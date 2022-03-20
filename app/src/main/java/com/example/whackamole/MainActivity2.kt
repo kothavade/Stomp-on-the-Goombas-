@@ -6,8 +6,10 @@ import android.content.DialogInterface
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
+import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.ScaleAnimation
 import android.widget.ImageView
@@ -23,8 +25,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.lang.Integer.min
+import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.collections.ArrayList
 import kotlin.random.Random
 
 private lateinit var x: ActivityMain2Binding
@@ -46,7 +48,7 @@ class MainActivity2 : AppCompatActivity() {
         x.progressBar.max = 100
         x.progressBar.isIndeterminate = false
         //init var
-        var score = 0
+        var score: Int = 0
         val seconds = AtomicInteger(0)
         val maxSeconds = AtomicInteger(60)
         val goombas: ArrayList<Goomba> = arrayListOf(
@@ -80,25 +82,36 @@ class MainActivity2 : AppCompatActivity() {
             Animation.RELATIVE_TO_SELF,
             0.5f
         )
+        var coinCount = 0
+        val coinList = mutableListOf<Int>()
+        fun addImage() {
+            coinCount++
+            coin.start()
+            val iv = ImageView(this)
+            iv.id = View.generateViewId()
+            iv.setPadding(1,0,1,0)
+            iv.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT)
+            if(coinCount%10==0 && coinCount != 0){
+                for(i in 0..coinList.size-1){
+                    val currImgView = findViewById<ImageView>(coinList[i])
+                    currImgView.visibility=View.GONE
+                    //coinList.removeAt(i)  TODO: WHY DOES THIS CRASH!?
+                }
+                iv.load(R.drawable.redcoin)
+            }
+            else {
+                coinList.add(iv.id)
+                iv.load(R.drawable.coin)
+            }
+            x.linearLayout.addView(iv)
+            iv.startAnimation(expand)
+        }
         expand.duration = 300
         goombas.forEachIndexed { i, goomba ->
             goomba.image.visibility = INVISIBLE
             //it.key.startAnimation(shrinkInstant)
             goomba.image.load(R.drawable.goombagif)
-            fun addImage() {
-                val iv = ImageView(this)
-                //iv.id = View.generateViewId()
-                iv.load(R.drawable.coin)
-                iv.setPadding(1,0,1,0)
-                iv.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT)
-                if (score <= 1700) {
-                    x.linearLayout1.addView(iv)
-                }
-                else if (score <= 3400) {
-                    x.linearLayout2.addView(iv)
-                }
-                iv.startAnimation(expand)
-            }
+
 
             goomba.image.setOnClickListener{
                 if (goomba.state == State.VIS) {
@@ -106,7 +119,6 @@ class MainActivity2 : AppCompatActivity() {
                         Type.GOOMBA -> {
                             score += 100
                             addImage()
-                            coin.start()
                             x.score.text = "$score points"
                             val imageView = it as ImageView
                             goomba.state = State.SQUASHED
@@ -135,9 +147,6 @@ class MainActivity2 : AppCompatActivity() {
                             goomba.image.visibility = INVISIBLE
                         }
                     }
-
-
-
                 }
             }
         }
